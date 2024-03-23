@@ -12,7 +12,7 @@ public class AustraliaPost {
     AustraliaPost(String key){
         this.API_KEY = key;
     }
-    public void getQuote(int fromPostalCode, int toPostalCode, int length, int width, int height, double weight, String serviceCode, String optionCode, String subOptionCode, String extraCover){
+    public void getQuote(int fromPostalCode, int toPostalCode, int length, int width, int height, double weight, String serviceCode){
         String urlString = String.format("https://digitalapi.auspost.com.au/postage/parcel/domestic/calculate?" +
                         "from_postcode=%s&" +
                         "to_postcode=%s&" +

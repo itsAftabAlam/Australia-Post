@@ -2,10 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!**/src/main/java/K.class
-!**/src/test/java/K.class
-C:\Users\aftab\Desktop\Australia-Post\src\main\java\K.class
-C:\Users\aftab\Desktop\Australia-Post\src\test\java\K.class
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
