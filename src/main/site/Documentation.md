@@ -690,10 +690,11 @@ HTTP Response Code: 500
 | 49256  | INVALID_WIDTH                       | The width <width> must be between <min width> cm and <max width> cm.                     | 400              |
 | 49258  | INVALID_PARCEL_DETAILS_COUNT        | A booking request may only contain from <min> to <max> parcel_details blocks.            | 400              |
 | 49259  | HEAVIEST_ITEM_EXCEEDS_TOTAL_WEIGHT | Weight of heaviest item <heaviest item> kg exceeds total combined weight of <weight> kg in the parcel details. | 400 |
-
-#### Credit
-This documentation is compiled taking reference from the official [Australia Post API docs](https://developers.auspost.com.au/docs/reference). For more information regarding usage of any of the Australia Post API used here refer to this official API docs.
 | 49261  | CURRENT_TIME_AFTER_BOOKING_CUTOFF  | The current time is after the booking cutoff time. For further assistance, please contact your Account Manager. | 400 |
 | 49262  | PICKUP_ADDRESS_UNSUPPORTED         | The requested address for pickup is outside of the serviced area.                         | 400              |
 | 49270  | PICKUP_VALUE_NOT_SUPPLIED          | A value for a mandatory field was not provided, or is empty. Please review and try again. | 400              |
 | 49271  | STOP_CREDIT                        | This action can’t be performed due to a charge account error. For further assistance, contact your Credit Officer (details are on your tax invoice). | 412 |
+
+#### Credit
+This documentation is compiled taking reference from the official [Australia Post API docs](https://developers.auspost.com.au/docs/reference). For more information regarding usage of any of the Australia Post API used here refer to this official API docs.
+
