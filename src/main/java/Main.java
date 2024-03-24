@@ -52,5 +52,32 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //sample on how to create a pickup
+        AustraliaPost pickup = new AustraliaPost(key);
+        String username4 = "your_username";
+        String password4 = "your_password";
+        String accountNumber4 = "your_account_number";
+        PickupDetails pickupDetails = new PickupDetails(
+                "EXP",
+                "1444444444442345678",
+                "2018-05-22",
+                "15:30:00",
+                "16:00:00",
+                "heavy items",
+                new PickupAddress("Fitzroy", "3065", "VIC", "Smith Pty Ltd", "Jane Smith", "reception on level 10", true, "0412222222"),
+                false,
+                "EXP1234567890",
+                List.of(
+                        new ParcelDetail("CTN", "test carton details", 10, 19, 30, 2, 17, 10),
+                        new ParcelDetail("SAT", "test satchel details", 20, 29, 15, 5, 7, 3)
+                ),
+                new BookingContactDetails("John Smith", "Smith Pty Ltd", "0413333333", "john.smith@smith.com")
+        );
+        try {
+            pickup.createPickup(username4, password4, accountNumber4, pickupDetails);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -30,6 +30,11 @@ public class AustraliaPost {
     AustraliaPost(String key){
         this.API_KEY = key;
     }
+
+    //there are several cases here
+    //and for each case there is a separate api
+    //the method below quotes the cost for only the standard domestic parcel
+    //similar other variations can be added for the other 3 apis that handle cost for international letter, international parcel, domestic letter
     public void getQuote(int fromPostalCode, int toPostalCode, int length, int width, int height, double weight, String serviceCode){
         String urlString = String.format("https://digitalapi.auspost.com.au/postage/parcel/domestic/calculate?" +
                         "from_postcode=%s&" +
@@ -63,6 +68,7 @@ public class AustraliaPost {
         }
     }
 
+    //this is used to track a particular shipment
     public void track(String username, String password, String accountNumber, String trackingIds){
         // Construct authentication header
         String auth = username + ":" + password;
@@ -95,6 +101,7 @@ public class AustraliaPost {
         }
     }
 
+    //this method is used for creating a domestic shipment
     public void createShipment(String username, String password, String accountNumber, List<Item> items) throws Exception {
         // Construct authentication header
         String auth = username + ":" + password;
@@ -130,6 +137,7 @@ public class AustraliaPost {
         }
     }
 
+    //this method is used for creating international shipment
     public void createInternationalShipment(String username, String password, String accountNumber, InternationalShipment shipmentInfo) throws Exception {
         // Construct authentication header
         String auth = username + ":" + password;
@@ -157,6 +165,39 @@ public class AustraliaPost {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             System.out.println("International shipment created successfully: " + response.body());
+        } else {
+            throw new Exception("Error: " + response.statusCode() + " - " + response.body());
+        }
+    }
+
+    //this method is used to create a pickup
+    public void createPickup(String username, String password, String accountNumber, PickupDetails pickupDetails) throws Exception {
+        // Construct authentication header
+        String auth = username + ":" + password;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+        // Construct request URI
+        String url = "https://digitalapi.auspost.com.au/shipping/v1/pickups/adhoc";
+
+        // Convert pickup details object to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        String jsonBody = objectMapper.writeValueAsString(pickupDetails);
+
+        // Create HTTP client and request
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("authorization", "Basic " + encodedAuth)
+                .header("account-number", accountNumber)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        // Send request and handle response
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 200) {
+            System.out.println("Adhoc pickup created successfully: " + response.body());
         } else {
             throw new Exception("Error: " + response.statusCode() + " - " + response.body());
         }
