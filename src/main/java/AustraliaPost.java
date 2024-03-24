@@ -6,7 +6,6 @@ import java.net.http.HttpResponse;
 import java.util.Base64;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AustraliaPost {
@@ -126,6 +125,38 @@ public class AustraliaPost {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             System.out.println("Shipment created successfully: " + response.body());
+        } else {
+            throw new Exception("Error: " + response.statusCode() + " - " + response.body());
+        }
+    }
+
+    public void createInternationalShipment(String username, String password, String accountNumber, InternationalShipment shipmentInfo) throws Exception {
+        // Construct authentication header
+        String auth = username + ":" + password;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+        // Construct request URI
+        String url = "https://digitalapi.auspost.com.au/shipping/v1/shipments";
+
+        // Convert shipment info object to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        String jsonBody = objectMapper.writeValueAsString(shipmentInfo);
+
+        // Create HTTP client and request
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("authorization", "Basic " + encodedAuth)
+                .header("account-number", accountNumber)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        // Send request and handle response
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 200) {
+            System.out.println("International shipment created successfully: " + response.body());
         } else {
             throw new Exception("Error: " + response.statusCode() + " - " + response.body());
         }
