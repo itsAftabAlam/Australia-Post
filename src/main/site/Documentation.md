@@ -515,7 +515,7 @@ JSON
   ]
 }
 ```
-Error Code Reference 
+#### Error Code Reference 
 | Code   | Name                       | Example Message                                                             |
 |--------|----------------------------|-----------------------------------------------------------------------------|
 | ESB-10001 | Invalid Tracking ID      | One or more submitted consignment ids could not be found.                   |
@@ -527,3 +527,170 @@ Error Code Reference
 | 51102  | TOO_MANY_ST_TRACKING_IDS  | The request must contain 10 or less StarTrack consignment ids.              |
 | 51103  | TRACKING_IDS_MIX_OF_AP_AND_ST | The request must only contain tracking ids for either StarTrack consignment ids or a mix of AP article ids, consignment ids, or barcode ids. |
 | 51104  | INVALID_TRACKING_ID        | One or more submitted tracking ids could not be found.                      |
+
+## Pickup API
+### Purpose
+This API is allows the client to create an adhoc pickup booking, and is implemented through the use of createPickup() method.
+A sample code to execute the method is also provided.
+
+### Endpoint
+HTTP Method : POST
+<br>
+Resource URL : ```https://digitalapi.auspost.com.au/shipping/v1/pickups/adhoc```
+
+### Headers
+|Name|Req/Optional|Description|
+|----|------------|------------|
+|authentication|Required|Your username and password as a HTTP Basic Auth hash|
+|account-number|Required|An 8 digit number for a StarTrack account.|
+
+### Sample Request 
+```
+POST
+https://digitalapi.auspost.com.au/shipping/v1/pickups/adhoc
+```
+JSON
+```
+ {
+    "adhoc_pickup": {
+        "product_id": "EXP",
+        "pickup_reference": "1444444444442345678",
+        "pickup_date": "2018-05-22",
+        "pickup_starttime": "15:30:00",
+        "pickup_endtime": "16:00:00",
+        "pickup_instructions": "heavy items",
+        "from": {
+            "lines": [
+                "Unit 1",
+                "123 Smith st"
+            ],
+            "suburb": "Fitzroy",
+            "postcode": "3065",
+            "state": "VIC",
+            "business_name": "Smith Pty Ltd",
+            "pickup_name": "Jane Smith",
+            "pickup_area": "reception on level 10",
+            "private_address": true,
+            "phone": "0412222222"
+        },
+        "contains_dangerous_goods": false,
+        "consignment_id": "EXP1234567890",
+        "parcel_details": [
+            {
+                "packaging_type": "CTN",
+                "comments": "test carton details",
+                "length": 10,
+                "height": 19,
+                "width": 30,
+                "count": 2,
+                "weight": 17,
+                "heaviest_item": 10
+            },
+            {
+                "packaging_type": "SAT",
+                "comments": "test satchel details",
+                "length": 20,
+                "height": 29,
+                "width": 15,
+                "count": 5,
+                "weight": 7,
+                "heaviest_item": 3
+            }
+        ]
+        "booking_contact_details": {
+            "name": "John Smith",
+            "business_name": "Smith Pty Ltd",
+            "phone": "0413333333",
+            "email": "john.smith@smith.com",
+        }
+    }
+}
+```
+Note: This request can be invoked from createPickup() method.
+
+### Sample Response
+HTTP Response Code: 201
+JSON
+```
+  {
+    "adhoc_pickups": [
+        {
+            "booking_id": "1234567"
+        }
+    ]
+}
+```
+HTTP Response Code: 400
+```
+ {
+    "errors": [
+        {
+            "code": "400",
+            "name": "INVALID_PRODUCT_ID",
+            "message": "The product ID ABC is not available",
+            "field": "adhocPickup.productId"
+        }
+    ]
+}
+```
+HTTP Response Code: 412
+```
+ {
+    "errors": [
+        {
+            "code": "412",
+            "name": "STOP_CREDIT",
+            "message": "This action can’t be performed due to a charge account error.
+                        For further assistance, contact your Credit Officer (details
+                        are on your tax invoice)."
+        }
+    ]
+}
+```
+HTTP Response Code: 500
+```
+ {
+    "errors": [
+        {
+            "code": "99999",
+            "name": "INTERNAL_ERROR",
+            "message": "An internal system error has occurred when processing your
+                        request.  Please attempt the request again at a later time,
+                        or if the issue persists, contact Australia Post Lodgement
+                        Support at auspost.com.au/lodgement-techsupport"
+        }
+    ]
+}
+```
+#### Error Response Reference
+| Code   | Name                                | Example Message                                                                        | HTTP Status Code |
+|--------|-------------------------------------|----------------------------------------------------------------------------------------|------------------|
+| 40002  | JSON_MANDATORY_FIELD_MISSING        | The input request is missing the mandatory field with the name <field name>. Please resubmit the request including the required fields and values. | 400              |
+| 49202  | ACCOUNT_NOT_FOUND                   | The account number does not exist.                                                     | 400              |
+| 49204  | INVALID_EMAIL_ADDRESS               | The email address is not in the right format.                                           | 400              |
+| 49220  | MAX_ADDRESS_LINES_EXCEEDED          | The maximum of 3 address lines has been exceeded.                                       | 400              |
+| 49224  | PAST_PICKUP_DATE_NOT_ALLOWED        | The pickup date cannot be in the past.                                                  | 400              |
+| 49225  | INVALID_FUTURE_PICKUP_DATE          | The pickup date cannot be more than 30 days in the future.                               | 400              |
+| 49226  | PICKUP_DATE_NOT_BUSINESS_DATE       | The pickup date is not a valid business day.                                            | 400              |
+| 49228  | PICKUP_TIME_IN_PAST                 | The pickup time cannot be in the past.                                                  | 400              |
+| 49229  | PICKUP_TIME_AFTER_FUTURE_CUTOFF     | The pickup start time is after the pickup cutoff time. Please book your pickup for the next business day. | 400          |
+| 49240  | PICKUP_START_TIME_IS_IN_PAST        | The pickup start time cannot be in the past.                                             | 400              |
+| 49243  | PICKUP_START_TIME_AFTER_PICKUP_END_TIME | The pickup start time is after the pickup end time.                                  | 400              |
+| 49244  | PICKUP_END_TIME_HAS_PASSED          | The current time is after the pickup end time.                                          | 400              |
+| 49245  | INVALID_PACKAGING_TYPE              | Packaging type <packaging_type> is not a valid value. Please select a valid packaging type from the list of available options: BUN, CTN, JIF, PAL, SAT, SKI, OTH. | |
+| 49246  | MAX_ITEM_COUNT_EXCEEDED             | Count per packaging type must be between <min value> and <max value>.                   | 400              |
+| 49248  | WEIGHT_LIMIT_EXCEEDED               | Total weight exceeds max limit <max weight> kg.                                          | 400              |
+| 49249  | INVALID_WEIGHT                      | The weight <weight> kg must be at least <min weight> kg.                                  | 400              |
+| 49250  | INVALID_WEIGHT_FORMAT               | The weight provided exceeds the maximum of 5 integral digits or 1 decimal places.        | 400              |
+| 49251  | INVALID_HEIGHT_FORMAT               | The height provided exceeds the maximum of 4 integral digits or 1 decimal places.        | 400              |
+| 49252  | INVALID_LENGTH_FORMAT               | The length provided exceeds the maximum of 4 integral digits or 1 decimal places.        | 400              |
+| 49253  | INVALID_WIDTH_FORMAT                | The width provided exceeds the maximum of 4 integral digits or 1 decimal places.         | 400              |
+| 49254  | INVALID_HEIGHT                      | The height <width> must be between <min height> cm and <max height> cm.                   | 400              |
+| 49255  | INVALID_LENGTH                      | The length <length> must be between <min length> cm and <max length> cm.                  | 400              |
+| 49256  | INVALID_WIDTH                       | The width <width> must be between <min width> cm and <max width> cm.                     | 400              |
+| 49258  | INVALID_PARCEL_DETAILS_COUNT        | A booking request may only contain from <min> to <max> parcel_details blocks.            | 400              |
+| 49259  | HEAVIEST_ITEM_EXCEEDS_TOTAL_WEIGHT | Weight of heaviest item <heaviest item> kg exceeds total combined weight of <weight> kg in the parcel details. | 400 |
+| 49261  | CURRENT_TIME_AFTER_BOOKING_CUTOFF  | The current time is after the booking cutoff time. For further assistance, please contact your Account Manager. | 400 |
+| 49262  | PICKUP_ADDRESS_UNSUPPORTED         | The requested address for pickup is outside of the serviced area.                         | 400              |
+| 49270  | PICKUP_VALUE_NOT_SUPPLIED          | A value for a mandatory field was not provided, or is empty. Please review and try again. | 400              |
+| 49271  | STOP_CREDIT                        | This action can’t be performed due to a charge account error. For further assistance, contact your Credit Officer (details are on your tax invoice). | 412 |
