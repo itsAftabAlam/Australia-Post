@@ -19,7 +19,7 @@ Resource URL : ```https://digitalapi.auspost.com.au/postage/parcel/domestic/serv
 ### Headers
 |Name|Req/Optional|Description|
 |----|------------|------------|
-|auth-key|required|Your PAC API Key (HTTP Header)|
+|auth-key|Required|Your PAC API Key (HTTP Header)|
 
 ### Required Parameters
 | Name           | Req/Optional | Description                                           |
@@ -43,6 +43,7 @@ https://digitalapi.auspost.com.au/postage/parcel/international/calculate.{format
 Note: This request can be invoked from getQuote() method.
 
 ### Sample Response
+JSON
 ```
 {
    "postage_result":{
@@ -71,8 +72,8 @@ Resource URL : ```https://digitalapi.auspost.com.au/shipping/v1/shipments```
 ### Headers
 |Name|Req/Optional|Description|
 |----|------------|------------|
-|authentication|required|Your username and password as a HTTP Basic Auth hash|
-|account-number|required|A 10 digit number for an Australia Post charge account, or an 8 digit number for a StarTrack account. |
+|authentication|Required|Your username and password as a HTTP Basic Auth hash|
+|account-number|Required|A 10 digit number for an Australia Post charge account, or an 8 digit number for a StarTrack account. |
 
 ### Sample Request 
 ```
@@ -158,6 +159,7 @@ Note: This request can be invoked from createShipment() method.
 
 ### Sample Response
 HTTP Response Code: 201
+JSON
 ```
  {
     "shipments": [
@@ -333,6 +335,7 @@ Note: This request can be invoked from createInternationalShipment() method.
 
 ### Sample Response
 HTTP Response Code: 201
+JSON
 ```
   {
     "shipments": [
@@ -379,6 +382,7 @@ HTTP Response Code: 201
 }
 ```
 HTTP Response Code: 400
+JSON
 ```
  {
     "errors": [
@@ -391,3 +395,135 @@ HTTP Response Code: 400
     ]
 }
 ```
+## Track Order
+### Purpose
+This API is used to track a particular shipment. This can be invoked using track() method which requires username, password, account number and tracking IDs.
+A sample code to execute the method is also provided.
+
+### Endpoint
+HTTP Method : GET
+<br>
+Resource URL : ```https://digitalapi.auspost.com.au/shipping/v1/track?tracking_ids={tracking_ids}```
+
+### Headers
+|Name|Req/Optional|Description|
+|----|------------|------------|
+|authentication|Required|Your username and password as a HTTP Basic Auth hash|
+|account-number|Required|A 10 digit number for an Australia Post charge account, or an 8 digit number for a StarTrack account|
+
+### Required Parameters
+| Name           | Req/Optional | Description                                           |
+|----------------|--------------|-------------------------------------------------------|
+|tracking_ids| Required     | A comma separated list of Australia Post tracking numbers or a comma separated list of StarTrack consignment numbers |
+
+
+### Sample Request 
+```
+GET
+https://digitalapi.auspost.com.au/shipping/v1/track?tracking_ids=7XX1000,7XX1000634011427
+```
+Note: This request can be invoked from track() method.
+
+### Sample Response
+HTTP Response Code: 200
+JSON
+```
+  {
+  "tracking_results": [
+    {
+      "tracking_id": "7XX1000",
+      "errors": [
+        {
+          "code": "ESB-10001",
+          "name": "Invalid tracking ID"
+        }
+      ]
+    },
+    {
+      "tracking_id": "7XX1000634011427",
+      "status": "Delivered",
+      "trackable_items": [
+        {
+          "article_id": "7XX1000634011427",
+          "product_type": "eParcel",
+          "events": [
+            {
+              "location": "ALEXANDRIA NSW",
+              "description": "Delivered",
+              "date": "2014-05-30T14:43:09+10:00"
+            },
+            {
+              "location": "ALEXANDRIA NSW",
+              "description": "With Australia Post for delivery today",
+              "date": "2014-05-30T06:08:51+10:00"
+            },
+            {
+              "location": "CHULLORA NSW",
+              "description": "Processed through Australia Post facility",
+              "date": "2014-05-29T19:40:19+10:00"
+            },
+            {
+              "location": "SYDNEY (AU)",
+              "description": "Arrived at facility in destination country",
+              "date": "2014-05-29T10:16:00+10:00"
+            },
+            {
+              "location": "JOHN F. KENNEDY APT\/NEW YORK (US)",
+              "description": "Departed facility",
+              "date": "2014-05-26T05:00:00+10:00"
+            },
+            {
+              "location": "JOHN F. KENNEDY APT\/NEW YORK (US)",
+              "description": "Departed facility",
+              "date": "2014-05-26T05:00:00+10:00"
+            },
+            {
+              "description": "Shipping information approved by Australia Post",
+              "date": "2014-05-23T14:27:15+10:00"
+            }
+          ],
+          "status": "Delivered"
+        }
+      ]
+    }
+  ]
+}
+```
+HTTP Response Code: 400
+JSON
+```
+{
+  "errors": [
+    {
+      "code": "51101",
+      "name": "TOO_MANY_AP_TRACKING_IDS",
+      "message": "The request must contain 10 or less AP article ids, consignment ids, or barcode ids."
+    }
+  ]
+}
+```
+HTTP Response Code: 429
+JSON
+```
+ {
+  "errors": [
+    {
+      "message": "Too many requests",
+      "error_code": "API_002",
+      "error_name": "Too many requests"
+    }
+  ]
+}
+```
+Error Code Reference 
+| Code   | Name                       | Example Message                                                             |
+|--------|----------------------------|-----------------------------------------------------------------------------|
+| ESB-10001 | Invalid Tracking ID      | One or more submitted consignment ids could not be found.                   |
+| ESB-10002 | Product Not Trackable   | The query article or query consignment call identified that the article or consignment respectively is not trackable. |
+| ESB-20010 | System Error            | An internal technical error occurred.                                       |
+| ESB-20050 | System Error            | An internal technical error occurred.                                       |
+| 51100  | TRACKING_IDS_MISSING       | The request must contain at least one tracking id.                           |
+| 51101  | TOO_MANY_AP_TRACKING_IDS  | The request must contain 10 or less AP article ids, consignment ids, or barcode ids. |
+| 51102  | TOO_MANY_ST_TRACKING_IDS  | The request must contain 10 or less StarTrack consignment ids.              |
+| 51103  | TRACKING_IDS_MIX_OF_AP_AND_ST | The request must only contain tracking ids for either StarTrack consignment ids or a mix of AP article ids, consignment ids, or barcode ids. |
+| 51104  | INVALID_TRACKING_ID        | One or more submitted tracking ids could not be found.                      |
